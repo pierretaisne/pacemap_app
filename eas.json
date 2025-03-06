@@ -1,0 +1,69 @@
+{
+  "cli": {
+    "version": ">= 5.9.1",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium",
+        "simulator": true
+      }
+    },
+    "development-device": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium",
+        "simulator": false
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "testflight": {
+      "autoIncrement": true,
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "m-medium",
+        "buildConfiguration": "Release",
+        "credentialsSource": "remote"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "m-medium",
+        "buildConfiguration": "Release"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6742881694",
+        "appleId": "pvtaisne@gmail.com",
+        "ascApiKeyId": "GDA2396GPP",
+        "ascApiKeyIssuerId": "c41b67dc-1f96-40ff-8f5c-9afa45a8a4e0",
+        "ascApiKeyPath": "./credentials/AuthKey_GDA2396GPP.p8",
+        "companyName": "Pierre Taisne"
+      }
+    },
+    "testflight": {
+      "ios": {
+        "ascAppId": "6742881694",
+        "appleId": "pvtaisne@gmail.com",
+        "ascApiKeyId": "GDA2396GPP",
+        "ascApiKeyIssuerId": "c41b67dc-1f96-40ff-8f5c-9afa45a8a4e0",
+        "ascApiKeyPath": "./credentials/AuthKey_GDA2396GPP.p8",
+        "companyName": "Pierre Taisne"
+      }
+    }
+  }
+}
