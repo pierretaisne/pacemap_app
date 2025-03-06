@@ -19,6 +19,7 @@ const useHealthData = () => {
   const getSteps = () => {
     if (Platform.OS !== 'ios') return;
 
+    console.log('Fetching steps...');
     const options = {
       date: new Date().toISOString(),
       includeManuallyAdded: true
@@ -26,10 +27,11 @@ const useHealthData = () => {
 
     AppleHealthKit.getStepCount(options, (err, results) => {
       if (err) {
-        console.log('Error getting steps:', err);
+        console.log('Error getting steps:', JSON.stringify(err));
         setError('Failed to get steps');
         return;
       }
+      console.log('Steps fetched successfully:', results.value);
       setSteps(results.value);
     });
   };

@@ -78,9 +78,12 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS === 'ios') {
+      console.log('Initializing HealthKit...');
       AppleHealthKit.initHealthKit(permissions, (err) => {
         if (err) {
-          console.log('Error initializing HealthKit:', err);
+          console.log('Error initializing HealthKit:', JSON.stringify(err));
+        } else {
+          console.log('HealthKit initialized successfully');
         }
       });
     }
