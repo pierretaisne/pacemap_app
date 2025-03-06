@@ -32,6 +32,7 @@ declare global {
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [healthKitInitialized, setHealthKitInitialized] = useState(false);
 
   const [fontsLoaded, fontError] = useFonts({
     'Outfit-Regular': Outfit_400Regular,
@@ -42,24 +43,62 @@ export default function RootLayout() {
 
   // Initialize HealthKit once at app startup
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const permissions = {
-        permissions: {
-          read: [AppleHealthKit.Constants.Permissions.Steps],
-          write: [],
-        },
-      };
+    const initializeHealthKit = async () => {
+      if (Platform.OS !== 'ios' || healthKitInitialized) {
+        return;
+      }
 
-      console.log('Initializing HealthKit...');
-      AppleHealthKit.initHealthKit(permissions, (err) => {
-        if (err) {
-          console.log('Error initializing HealthKit:', err);
-          return;
-        }
-        console.log('HealthKit initialized successfully');
-      });
-    }
-  }, []);
+      try {
+        const permissions = {
+          permissions: {
+            read: [
+              AppleHealthKit.Constants.Permissions.Steps,
+              AppleHealthKit.Constants.Permissions.StepCount
+            ],
+            write: [],
+          },
+        } as HealthKitPermissions;
+
+        console.log('[HealthKit] Starting initialization...');
+        
+        // First initialize
+        AppleHealthKit.initHealthKit(permissions, (err) => {
+          if (err) {
+            console.log('[HealthKit] Error initializing:', err);
+            return;
+          }
+          console.log('[HealthKit] Initialized successfully');
+          
+          // After initialization, explicitly request authorization
+          AppleHealthKit.isAvailable((error, available) => {
+            if (error) {
+              console.log('[HealthKit] Error checking availability:', error);
+              return;
+            }
+            
+            if (!available) {
+              console.log('[HealthKit] Not available on this device');
+              return;
+            }
+
+            // Request authorization
+            AppleHealthKit.getAuthStatus(permissions, (error, result) => {
+              if (error) {
+                console.log('[HealthKit] Error getting auth status:', error);
+                return;
+              }
+              console.log('[HealthKit] Auth status:', result);
+              setHealthKitInitialized(true);
+            });
+          });
+        });
+      } catch (error) {
+        console.log('[HealthKit] Caught error during initialization:', error);
+      }
+    };
+
+    initializeHealthKit();
+  }, [healthKitInitialized]);
 
   useEffect(() => {
     if (Platform.OS === 'web') {

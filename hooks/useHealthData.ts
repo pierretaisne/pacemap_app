@@ -1,38 +1,59 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Platform } from 'react-native';
-import AppleHealthKit from 'react-native-health';
+import AppleHealthKit, { HealthValue } from 'react-native-health';
 
 const useHealthData = () => {
-  const [steps, setSteps] = useState(0);
+  const [steps, setSteps] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const getSteps = () => {
-    if (Platform.OS !== 'ios') return;
+  const getSteps = useCallback(async () => {
+    if (Platform.OS !== 'ios') {
+      setError('HealthKit is only available on iOS');
+      return;
+    }
 
-    const options = {
-      date: new Date().toISOString(), // Get today's steps
-      includeManuallyAdded: true
-    };
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    AppleHealthKit.getStepCount(options, (err, results) => {
-      if (err) {
-        console.log('Error getting steps:', err);
-        setError('Failed to get steps');
-        return;
-      }
+      const options = {
+        date: new Date().toISOString(),
+        includeManuallyAdded: true
+      };
+
+      // Wrap the callback-based API in a Promise
+      const getStepsPromise = () => new Promise<HealthValue>((resolve, reject) => {
+        AppleHealthKit.getStepCount(options, (err, results) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(results);
+        });
+      });
+
+      const results = await getStepsPromise();
       setSteps(results.value || 0);
       setError(null);
-    });
-  };
-
-  // Get steps on mount and when refreshing
-  useEffect(() => {
-    getSteps();
+    } catch (err) {
+      console.log('[HealthKit] Error fetching steps:', err);
+      setError('Failed to get steps. Please check Health app permissions.');
+      setSteps(0);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  return { 
+  // Get steps on mount
+  useEffect(() => {
+    getSteps();
+  }, [getSteps]);
+
+  return {
     steps,
     error,
+    isLoading,
     refreshSteps: getSteps
   };
 };
