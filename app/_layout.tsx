@@ -6,9 +6,10 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faMapLocationDot, faHouse } from '@fortawesome/free-solid-svg-icons';
 import 'react-native-url-polyfill/auto';
 import { useFonts, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold } from '@expo-google-fonts/outfit';
-import { SplashScreen } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
+import AppleHealthKit, { HealthKitPermissions } from 'react-native-health';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -27,6 +28,13 @@ declare global {
     frameworkReady?: () => void;
   }
 }
+
+const permissions: HealthKitPermissions = {
+  permissions: {
+    read: [AppleHealthKit.Constants.Permissions.Steps],
+    write: [],
+  },
+};
 
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
@@ -67,6 +75,16 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      AppleHealthKit.initHealthKit(permissions, (err) => {
+        if (err) {
+          console.log('Error initializing HealthKit:', err);
+        }
+      });
+    }
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
