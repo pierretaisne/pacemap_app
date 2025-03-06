@@ -29,13 +29,6 @@ declare global {
   }
 }
 
-const permissions: HealthKitPermissions = {
-  permissions: {
-    read: [AppleHealthKit.Constants.Permissions.Steps],
-    write: [],
-  },
-};
-
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +39,27 @@ export default function RootLayout() {
     'Outfit-SemiBold': Outfit_600SemiBold,
     'Outfit-Bold': Outfit_700Bold,
   });
+
+  // Initialize HealthKit once at app startup
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      const permissions = {
+        permissions: {
+          read: [AppleHealthKit.Constants.Permissions.Steps],
+          write: [],
+        },
+      };
+
+      console.log('Initializing HealthKit...');
+      AppleHealthKit.initHealthKit(permissions, (err) => {
+        if (err) {
+          console.log('Error initializing HealthKit:', err);
+          return;
+        }
+        console.log('HealthKit initialized successfully');
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -71,23 +85,21 @@ export default function RootLayout() {
 
   // Hide splash screen once fonts are loaded
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
+    async function prepare() {
+      try {
+        if (fontsLoaded || fontError) {
+          await SplashScreen.hideAsync();
+        }
+      } catch (e) {
+        console.warn('Error hiding splash screen:', e);
+      }
     }
+    prepare();
   }, [fontsLoaded, fontError]);
 
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      console.log('Initializing HealthKit...');
-      AppleHealthKit.initHealthKit(permissions, (err) => {
-        if (err) {
-          console.log('Error initializing HealthKit:', JSON.stringify(err));
-        } else {
-          console.log('HealthKit initialized successfully');
-        }
-      });
-    }
-  }, []);
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
     <View style={{ flex: 1 }}>
