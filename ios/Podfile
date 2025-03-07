@@ -62,5 +62,17 @@ target 'PaceMap' do
         end
       end
     end
+    
+    # Fix for sandbox permission issues
+    system('find "${PODS_ROOT}" -name "*.sh" -type f -exec chmod +x {} \;')
+  end
+end
+
+# Fix for sandbox permission issues with expo-configure-project.sh
+post_integrate do |installer|
+  expo_config_script = "#{installer.sandbox.root}/Target Support Files/Pods-PaceMap/expo-configure-project.sh"
+  if File.exist?(expo_config_script)
+    system("chmod +x \"#{expo_config_script}\"")
+    puts "Made expo-configure-project.sh executable"
   end
 end
