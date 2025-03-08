@@ -310,7 +310,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file\nset -e\n\n# Set PATH to include common Node installation locations\nexport PATH=\"$PATH:/usr/local/bin:/opt/homebrew/bin:/usr/bin\"\n\n# Debug: Print current PATH\necho \"PATH: $PATH\"\n\n# Debug: Try to locate node\nwhich node || echo \"node not found in PATH\"\n\n# Use system Node\nNODE_BINARY=$(which node)\necho \"Using Node at: $NODE_BINARY\"\n\nWORKSPACE_ROOT=\"$PROJECT_DIR/..\"\n\n# Debug: Check if script exists\nSCRIPT_PATH=\"$WORKSPACE_ROOT/node_modules/expo/scripts/ios/podinstall.js\"\nif [ -f \"$SCRIPT_PATH\" ]; then\n    echo \"Found script at: $SCRIPT_PATH\"\nelse\n    echo \"Script not found at: $SCRIPT_PATH\"\n    exit 1\nfi\n\n# Run script with system Node\n\"$NODE_BINARY\" \"$SCRIPT_PATH\"\n";
+			shellScript = "# This script runs pod install\nset -e\n\ncd \"$PROJECT_DIR\"\n/opt/homebrew/bin/pod install\n";
 		};
 		FD1E3C0BC4F53280868C4CD0 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
