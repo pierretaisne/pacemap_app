@@ -1,4 +1,4 @@
-chmod +x ios/Pods/Target\ Support\ Files/Pods-PaceMap/expo-configure-project.sh// !$*UTF8*$!
+// !$*UTF8*$!
 {
 	archiveVersion = 1;
 	classes = {
