@@ -1,4 +1,4 @@
-// !$*UTF8*$!
+chmod +x ios/Pods/Target\ Support\ Files/Pods-PaceMap/expo-configure-project.sh// !$*UTF8*$!
 {
 	archiveVersion = 1;
 	classes = {
@@ -307,7 +307,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-PaceMap/expo-configure-project.sh\"\n";
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./scripts/expo-configure-fix.sh\"\n";
 		};
 		FD1E3C0BC4F53280868C4CD0 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
