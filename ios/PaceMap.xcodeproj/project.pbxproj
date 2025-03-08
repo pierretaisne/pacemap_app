@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A89AC1E4DC29B9607B31941 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5459FEF563F691B55CB73A23 /* ExpoModulesProvider.swift */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -26,6 +27,7 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = PaceMap/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = PaceMap/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = PaceMap/main.m; sourceTree = "<group>"; };
+		5459FEF563F691B55CB73A23 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-PaceMap/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		58EEBF8E8E6FB1BC6CAF49B5 /* libPods-PaceMap.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PaceMap.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		597BC51EF5559FDB0E9C887E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = PaceMap/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6C2E3173556A471DD304B334 /* Pods-PaceMap.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PaceMap.debug.xcconfig"; path = "Target Support Files/Pods-PaceMap/Pods-PaceMap.debug.xcconfig"; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */,
+				5459FEF563F691B55CB73A23 /* ExpoModulesProvider.swift */,
 			);
 			name = PaceMap;
 			sourceTree = "<group>";
@@ -307,7 +310,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./scripts/expo-configure-fix.sh\"\n";
+			shellScript = "# This script configures Expo modules and generates the modules provider file\nset -e\n\nWORKSPACE_ROOT=\"$PROJECT_DIR/..\"\nNODE_BINARY=\"$WORKSPACE_ROOT/node_modules/.bin/node\"\n\n# Source environment variables\nif [ -f \"$WORKSPACE_ROOT/.xcode.env\" ]; then\n  source \"$WORKSPACE_ROOT/.xcode.env\"\nfi\nif [ -f \"$WORKSPACE_ROOT/.xcode.env.local\" ]; then\n  source \"$WORKSPACE_ROOT/.xcode.env.local\"\nfi\n\n# Ensure node exists\nif [ -z \"$(command -v node)\" ] && [ ! -f \"$NODE_BINARY\" ]; then\n  echo \"error: Cannot find node. Run yarn/npm install first.\"\n  exit 1\nfi\n\n# Run script\nif [ -f \"$NODE_BINARY\" ]; then\n  \"$NODE_BINARY\" \"$WORKSPACE_ROOT/node_modules/expo/scripts/ios/podinstall.js\"\nelse\n  node \"$WORKSPACE_ROOT/node_modules/expo/scripts/ios/podinstall.js\"\nfi\n";
 		};
 		FD1E3C0BC4F53280868C4CD0 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -338,6 +341,7 @@
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
 				39A3B080A3484EEC931AD82C /* noop-file.swift in Sources */,
+				0A89AC1E4DC29B9607B31941 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
