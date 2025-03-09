@@ -3,6 +3,7 @@ import { TouchableOpacity, Text, StyleSheet, Platform, View, ActivityIndicator, 
 import { supabase } from '../lib/supabase';
 import useHealthData from '../hooks/useHealthData';
 
+
 interface StepLog {
   user_id: string;
   steps: number;
@@ -66,7 +67,7 @@ export default function AppleHealthConnect({ inSettings = true }: AppleHealthCon
         Linking.openURL('app-settings:').catch(() => {
           Alert.alert(
             'Cannot Open Settings', 
-            'Please open the Settings app manually and go to Privacy & Security > Health to grant permissions.'
+            'Please Open the Settings App Manually and go to Privacy & Security > Health to grant permissions.'
           );
         });
       });
