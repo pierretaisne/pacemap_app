@@ -13,10 +13,10 @@ import { useRouter } from 'expo-router';
 const MAPBOX_STYLE_URL = 'mapbox://styles/mapbox/cj7t3i5yj0unt2rmt3y4b5e32';
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoibWFwYm94LW1hcC1kZXNpZ24iLCJhIjoiY2syeHpiaHlrMDJvODNidDR5azU5NWcwdiJ9.x0uSqSWGXdoFKuHZC5Eo_Q';
 
-// Default coordinates (Notre Dame, Paris)
-const DEFAULT_LATITUDE = 48.8530;
-const DEFAULT_LONGITUDE = 2.3499;
-const DEFAULT_ZOOM = 16;
+// Default coordinates (New York City)
+const DEFAULT_LATITUDE = 40.7128;
+const DEFAULT_LONGITUDE = -74.0060;
+const DEFAULT_ZOOM = 11;
 const DEFAULT_PITCH = 0;
 const DEFAULT_BEARING = 0;
 
@@ -35,7 +35,8 @@ interface Asset {
   name: string;
   description: string | null;
   price: number;
-  coordinates: [number, number];
+  latitude: number;
+  longitude: number;
   user_id: string;
   city_id: string;
   type: string;
@@ -125,7 +126,17 @@ export default function MapScreen() {
       const { data: allAssetsData, error: allAssetsError } = await supabase
         .from('assets')
         .select(`
-          *,
+          id,
+          name,
+          description,
+          price,
+          latitude,
+          longitude,
+          city_id,
+          type,
+          image_url,
+          color,
+          created_at,
           user_assets (
             user_id,
             user_profiles (
@@ -159,22 +170,6 @@ export default function MapScreen() {
       if (allAssetsData) {
         // Transform all assets data
         const transformedAllAssets = allAssetsData.map(asset => {
-          let coordinates: [number, number] = [0, 0];
-          
-          // Handle coordinates parsing
-          if (typeof asset.coordinates === 'string') {
-            try {
-              const parsed = JSON.parse(asset.coordinates);
-              if (Array.isArray(parsed) && parsed.length >= 2) {
-                coordinates = [Number(parsed[0]), Number(parsed[1])];
-              }
-            } catch (e) {
-              console.error('Error parsing coordinates:', e);
-            }
-          } else if (Array.isArray(asset.coordinates) && asset.coordinates.length >= 2) {
-            coordinates = [Number(asset.coordinates[0]), Number(asset.coordinates[1])];
-          }
-
           // Get the owner's avatar URL if the asset is owned by someone
           const ownerData = asset.user_assets?.[0];
           const ownerAvatarUrl = ownerData?.user_profiles?.avatar_url;
@@ -184,7 +179,8 @@ export default function MapScreen() {
             name: asset.name,
             description: asset.description,
             price: asset.price,
-            coordinates,
+            latitude: asset.latitude,
+            longitude: asset.longitude,
             city_id: asset.city_id,
             type: asset.type,
             image_url: asset.image_url,
@@ -283,8 +279,8 @@ export default function MapScreen() {
           mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
           
           const bounds = [
-            [-180, -40], // Southwest coordinates (limit to -60° latitude)
-            [180, 90]    // Northeast coordinates
+            [-74.2591, 40.4774], // Southwest coordinates (NYC area)
+            [-73.7002, 40.9176]    // Northeast coordinates (NYC area)
           ] as [[number, number], [number, number]];
           
           const map = new mapboxgl.Map({
@@ -292,27 +288,66 @@ export default function MapScreen() {
             style: MAPBOX_STYLE_URL,
             center: [DEFAULT_LONGITUDE, DEFAULT_LATITUDE],
             zoom: DEFAULT_ZOOM,
-            pitch: 0,
-            bearing: 0,
+            pitch: 45,
+            bearing: -17.6,
             dragRotate: false,
-            touchZoomRotate: false,
+            touchZoomRotate: true,
             maxBounds: bounds,
-            minZoom: 1,
+            minZoom: 8,
             maxZoom: 20,
             renderWorldCopies: false,
+            antialias: true,
             projection: {
               name: 'mercator',
-              center: [0, 0]
+              center: [DEFAULT_LONGITUDE, DEFAULT_LATITUDE]
             }
           });
           
-          // Disable rotation but keep zoom functionality
+          // Disable only rotation but keep zoom functionality
           map.dragRotate.disable();
-          map.touchZoomRotate.disable();
+          map.touchZoomRotate.disableRotation();
           map.doubleClickZoom.disable(); // Disable double-click zoom to prevent accidental zooming
           
-          map.on('load', () => {
-            console.log('Map loaded successfully');
+          map.on('style.load', () => {
+            // Insert the layer beneath any symbol layer.
+            const layers = map.getStyle().layers;
+            const labelLayerId = layers.find(
+              (layer) => layer.type === 'symbol' && layer.layout['text-field']
+            ).id;
+
+            // Add 3D building layer
+            map.addLayer({
+              'id': 'add-3d-buildings',
+              'source': 'composite',
+              'source-layer': 'building',
+              'filter': ['==', 'extrude', 'true'],
+              'type': 'fill-extrusion',
+              'minzoom': 8,
+              'paint': {
+                'fill-extrusion-color': '#ADD8E6',
+                'fill-extrusion-height': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  12,
+                  0,
+                  12.05,
+                  ['get', 'height']
+                ],
+                'fill-extrusion-base': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  12,
+                  0,
+                  12.05,
+                  ['get', 'min_height']
+                ],
+                'fill-extrusion-opacity': 0.9
+              }
+            }, labelLayerId);
+
+            console.log('Map loaded successfully with 3D buildings');
           });
         };
         document.head.appendChild(script);
@@ -367,10 +402,9 @@ export default function MapScreen() {
         }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; }
         .marker {
-          width: 35px;
-          height: 35px;
+          width: 20px;
+          height: 20px;
           cursor: pointer;
-          filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
         }
         .marker:hover {
           transform: scale(1.1);
@@ -382,7 +416,6 @@ export default function MapScreen() {
           border: 2px solid #000000;
           object-fit: cover;
           cursor: pointer;
-          filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
         }
         .user-owned-marker:hover {
           transform: scale(1.1);
@@ -393,7 +426,6 @@ export default function MapScreen() {
           border-radius: 50%;
           background: #B197FC;
           border: 2px solid #000000;
-          box-shadow: 3px 2px 0px #000000;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -527,22 +559,61 @@ export default function MapScreen() {
           style: '${MAPBOX_STYLE_URL}',
           center: [${DEFAULT_LONGITUDE}, ${DEFAULT_LATITUDE}],
           zoom: ${DEFAULT_ZOOM},
-          pitch: 0,
-          bearing: 0,
-          minZoom: 1,
+          pitch: 45,
+          bearing: -17.6,
+          dragRotate: false,
+          touchZoomRotate: true,
+          maxBounds: [[-74.2591, 40.4774], [-73.7002, 40.9176]],
+          minZoom: 10,
           maxZoom: 20,
           renderWorldCopies: false,
+          antialias: true,
           projection: {
             name: 'mercator',
-            center: [0, 0]
+            center: [${DEFAULT_LONGITUDE}, ${DEFAULT_LATITUDE}]
           }
         });
-        map.on('load', () => {
-          // Disable two-finger rotation while keeping zoom enabled.
-          map.dragRotate.disable();
-          map.touchZoomRotate.disableRotation();
-        });
+        map.on('style.load', () => {
+          // Insert the layer beneath any symbol layer.
+          const layers = map.getStyle().layers;
+          const labelLayerId = layers.find(
+            (layer) => layer.type === 'symbol' && layer.layout['text-field']
+          ).id;
 
+          // Add 3D building layer
+          map.addLayer({
+            'id': 'add-3d-buildings',
+            'source': 'composite',
+            'source-layer': 'building',
+            'filter': ['==', 'extrude', 'true'],
+            'type': 'fill-extrusion',
+            'minzoom': 8,
+            'paint': {
+              'fill-extrusion-color': '#ADD8E6',
+              'fill-extrusion-height': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                15,
+                0,
+                15.05,
+                ['get', 'height']
+              ],
+              'fill-extrusion-base': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                15,
+                0,
+                15.05,
+                ['get', 'min_height']
+              ],
+              'fill-extrusion-opacity': 0.6
+            }
+          }, labelLayerId);
+
+          console.log('Map loaded successfully with 3D buildings');
+        });
 
         // Add navigation controls
         map.addControl(new mapboxgl.NavigationControl({
@@ -561,7 +632,7 @@ export default function MapScreen() {
                 type: 'Feature',
                 geometry: {
                   type: 'Point',
-                  coordinates: asset.coordinates
+                  coordinates: [asset.longitude, asset.latitude]
                 },
                 properties: {
                   id: asset.id,
@@ -642,7 +713,7 @@ export default function MapScreen() {
                 el.innerHTML = \`<img class="user-owned-marker" src="\${owner_avatar_url}" alt="Asset Owner" />\`;
               } else {
                 // Use purple marker for unowned assets
-                el.innerHTML = \`<div class="marker" style="background-color: #B197FC; width: 35px; height: 35px; border-radius: 50%; border: 2px solid #000000; box-shadow: 3px 2px 0px #000000;"></div>\`;
+                el.innerHTML = \`<div class="marker" style="background-color: #B197FC; width: 15px; height: 15px; border-radius: 50%; border: 1px solid #000000;"></div>\`;
               }
               
               new mapboxgl.Marker({
