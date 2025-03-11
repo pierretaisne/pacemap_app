@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "PaceMap",
+    "slug": "bolt-expo-nativewind",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "scheme": "pacemap",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pvtaisne.stepmap",
+      "buildNumber": "1",
+      "icon": "./assets/images/icon.png",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "This app uses HealthKit to access your step count data.",
+        "NSHealthUpdateUsageDescription": "This app uses HealthKit to update your health data.",
+        "CFBundleIconName": "AppIcon"
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": ["activity", "fitness"]
+      }
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "react-native-health",
+        {
+          "healthSharePermission": "Allow PaceMap to access your health data.",
+          "healthUpdatePermission": "Allow PaceMap to update your health data."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f70e319f-2d6e-4dcc-b773-2572ee5d2939"
+      }
+    },
+    "android": {
+      "package": "com.pvtaisne.stepmap"
+    }
+  }
+}
